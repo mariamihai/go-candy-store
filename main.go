@@ -5,6 +5,12 @@ import (
 	"fmt"
 )
 
+type consumedEntry struct {
+	Name  string `json:"name"`
+	Candy string `json:"candy"`
+	Eaten int    `json:"eaten"`
+}
+
 var customerList = []consumedEntry{
 	{Name: "Annika", Candy: "Geisha", Eaten: 100},
 	{Name: "Jonas", Candy: "Geisha", Eaten: 200},
@@ -34,19 +40,20 @@ func main() {
 	fmt.Println(string(customerPreferences))
 }
 
+type candy struct {
+	Candy string `json:"candy"`
+	Eaten int    `json:"eaten"`
+}
+
 // Creates a map of consumer names and a slice of candies summed by candy type for each individual consumer
 func mapConsumersData(customerList []consumedEntry) map[string][]candy {
 	uniqueConsumersData := make(map[string][]candy)
-	uniqueEvaluation := make(map[string]bool)
 
 	for _, customer := range customerList {
-		if _, ok := uniqueEvaluation[customer.Name]; !ok {
-			uniqueEvaluation[customer.Name] = true
-
+		if candies, ok := uniqueConsumersData[customer.Name]; !ok {
 			uniqueConsumersData[customer.Name] = []candy{{Candy: customer.Candy, Eaten: customer.Eaten}}
 		} else {
-			uniqueConsumersData[customer.Name] = mapCandies(uniqueConsumersData[customer.Name],
-				candy{Candy: customer.Candy, Eaten: customer.Eaten})
+			uniqueConsumersData[customer.Name] = mapCandies(candies, candy{Candy: customer.Candy, Eaten: customer.Eaten})
 		}
 	}
 
@@ -57,10 +64,10 @@ func mapConsumersData(customerList []consumedEntry) map[string][]candy {
 func mapCandies(candies []candy, newCandy candy) []candy {
 	var found bool
 
-	for index, candyC := range candies {
-		if candyC.Candy == newCandy.Candy {
+	for index, c := range candies {
+		if c.Candy == newCandy.Candy {
 			candies = append(candies[:index], candies[index+1:]...)
-			candies = append(candies, candy{Candy: newCandy.Candy, Eaten: newCandy.Eaten + candyC.Eaten})
+			candies = append(candies, candy{Candy: newCandy.Candy, Eaten: newCandy.Eaten + c.Eaten})
 
 			found = true
 			break
@@ -86,14 +93,18 @@ func findPreferredCandy(candies []candy) string {
 	return preferredCandy.Candy
 }
 
-func findTotalAmount(candies []candy) int {
-	var totalCandies int
-
+func findTotalAmount(candies []candy) (totalCandies int) {
 	for _, c := range candies {
 		totalCandies += c.Eaten
 	}
 
 	return totalCandies
+}
+
+type customerPreferences struct {
+	Name  string `json:"name"`
+	Candy string `json:"favouriteSnack"`
+	Eaten int    `json:"totalSnacks"`
 }
 
 // Map favourite snack adn teh total amount of sweets eaten for each
@@ -107,21 +118,4 @@ func setPreferredCandyForEachCustomer(unique map[string][]candy) []customerPrefe
 	}
 
 	return customers
-}
-
-type consumedEntry struct {
-	Name  string `json:"name"`
-	Candy string `json:"candy"`
-	Eaten int    `json:"eaten"`
-}
-
-type candy struct {
-	Candy string `json:"candy"`
-	Eaten int    `json:"eaten"`
-}
-
-type customerPreferences struct {
-	Name  string `json:"name"`
-	Candy string `json:"favouriteSnack"`
-	Eaten int    `json:"totalSnacks"`
 }
