@@ -35,15 +35,15 @@ func main() {
 }
 
 // Creates a map of consumer names and a slice of candies summed by candy type for each individual consumer
-func mapConsumersData(customerList []consumedEntry) map[string][]candy {
-	uniqueConsumersData := make(map[string][]candy)
+func mapConsumersData(customerList []consumedEntry) map[string][]*candy {
+	uniqueConsumersData := make(map[string][]*candy)
 	uniqueEvaluation := make(map[string]bool)
 
 	for _, customer := range customerList {
 		if _, ok := uniqueEvaluation[customer.Name]; !ok {
 			uniqueEvaluation[customer.Name] = true
 
-			uniqueConsumersData[customer.Name] = []candy{{Candy: customer.Candy, Eaten: customer.Eaten}}
+			uniqueConsumersData[customer.Name] = []*candy{{Candy: customer.Candy, Eaten: customer.Eaten}}
 		} else {
 			uniqueConsumersData[customer.Name] = mapCandies(uniqueConsumersData[customer.Name],
 				candy{Candy: customer.Candy, Eaten: customer.Eaten})
@@ -54,13 +54,12 @@ func mapConsumersData(customerList []consumedEntry) map[string][]candy {
 }
 
 // Map the amount of individual candies a consumer eats
-func mapCandies(candies []candy, newCandy candy) []candy {
+func mapCandies(candies []*candy, newCandy candy) []*candy {
 	var found bool
 
-	for index, candyC := range candies {
+	for _, candyC := range candies {
 		if candyC.Candy == newCandy.Candy {
-			candies = append(candies[:index], candies[index+1:]...)
-			candies = append(candies, candy{Candy: newCandy.Candy, Eaten: newCandy.Eaten + candyC.Eaten})
+			candyC.Eaten += newCandy.Eaten
 
 			found = true
 			break
@@ -68,13 +67,13 @@ func mapCandies(candies []candy, newCandy candy) []candy {
 	}
 
 	if !found {
-		candies = append(candies, newCandy)
+		candies = append(candies, &newCandy)
 	}
 
 	return candies
 }
 
-func findPreferredCandy(candies []candy) string {
+func findPreferredCandy(candies []*candy) string {
 	preferredCandy := candies[0]
 
 	for _, c := range candies {
@@ -86,7 +85,7 @@ func findPreferredCandy(candies []candy) string {
 	return preferredCandy.Candy
 }
 
-func findTotalAmount(candies []candy) int {
+func findTotalAmount(candies []*candy) int {
 	var totalCandies int
 
 	for _, c := range candies {
@@ -97,7 +96,7 @@ func findTotalAmount(candies []candy) int {
 }
 
 // Map favourite snack adn teh total amount of sweets eaten for each
-func setPreferredCandyForEachCustomer(unique map[string][]candy) []customerPreferences {
+func setPreferredCandyForEachCustomer(unique map[string][]*candy) []customerPreferences {
 	var customers []customerPreferences
 
 	for customerName, candiesEaten := range unique {
