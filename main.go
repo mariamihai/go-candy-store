@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 var customerList = []consumedEntry{
 	{Name: "Annika", Candy: "Geisha", Eaten: 100},
@@ -23,7 +26,12 @@ var customerList = []consumedEntry{
 }
 
 func main() {
-	fmt.Println(setPreferredCandyForEachCustomer(mapConsumersData(customerList)))
+	customerPreferences, err := json.Marshal(setPreferredCandyForEachCustomer(mapConsumersData(customerList)))
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(string(customerPreferences))
 }
 
 // Creates a map of consumer names and a slice of candies summed by candy type for each individual consumer
