@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 var customerList = []consumedEntry{
 	{Name: "Annika", Candy: "Geisha", Eaten: 100},
 	{Name: "Jonas", Candy: "Geisha", Eaten: 200},
@@ -21,11 +23,56 @@ var customerList = []consumedEntry{
 }
 
 func main() {
+	fmt.Println(mapConsumersData(customerList))
+}
 
+// Creates a map of consumer names and a slice of candies summed by candy type for each individual consumer
+func mapConsumersData(customerList []consumedEntry) map[string][]candy {
+	uniqueConsumersData := make(map[string][]candy)
+	uniqueEvaluation := make(map[string]bool)
+
+	for _, customer := range customerList {
+		if _, ok := uniqueEvaluation[customer.Name]; !ok {
+			uniqueEvaluation[customer.Name] = true
+
+			uniqueConsumersData[customer.Name] = []candy{{Candy: customer.Candy, Eaten: customer.Eaten}}
+		} else {
+			uniqueConsumersData[customer.Name] = mapCandies(uniqueConsumersData[customer.Name],
+				candy{Candy: customer.Candy, Eaten: customer.Eaten})
+		}
+	}
+
+	return uniqueConsumersData
+}
+
+// Map the amount of individual candies a consumer eats
+func mapCandies(candies []candy, newCandy candy) []candy {
+	var found bool
+
+	for index, candyC := range candies {
+		if candyC.Candy == newCandy.Candy {
+			candies = append(candies[:index], candies[index+1:]...)
+			candies = append(candies, candy{Candy: newCandy.Candy, Eaten: newCandy.Eaten + candyC.Eaten})
+
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		candies = append(candies, newCandy)
+	}
+
+	return candies
 }
 
 type consumedEntry struct {
 	Name  string `json:"name"`
+	Candy string `json:"candy"`
+	Eaten int    `json:"eaten"`
+}
+
+type candy struct {
 	Candy string `json:"candy"`
 	Eaten int    `json:"eaten"`
 }
