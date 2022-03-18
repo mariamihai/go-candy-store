@@ -98,7 +98,7 @@ func findTotalAmount(candies []candy) (totalCandies int) {
 		totalCandies += c.Eaten
 	}
 
-	return totalCandies
+	return
 }
 
 type customerPreferences struct {
@@ -108,14 +108,12 @@ type customerPreferences struct {
 }
 
 // Map favourite snack adn teh total amount of sweets eaten for each
-func setPreferredCandyForEachCustomer(unique map[string][]candy) []customerPreferences {
-	var customers []customerPreferences
-
+func setPreferredCandyForEachCustomer(unique map[string][]candy) (customers []customerPreferences) {
 	for customerName, candiesEaten := range unique {
 		preferredCandy := findPreferredCandy(candiesEaten)
 		totalCandies := findTotalAmount(candiesEaten)
 		customers = append(customers, customerPreferences{Name: customerName, Candy: preferredCandy, Eaten: totalCandies})
 	}
 
-	return customers
+	return
 }
